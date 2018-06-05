@@ -114,12 +114,15 @@ This paper investigates the definition of feature-aware basis functions in the c
 \section{Introduction\label{sec:INTRODUCTION}}
 Shape similarity and correspondence between 3D shapes are central to several applications in geometry processing and shape analysis, such as non-rigid shape matching, co-segmentation, texture and deformation transfer. To compute mappings or correspondences between 3D shapes, one of the main approaches is to formulate them as mappings between functions, through the functional map framework, rather than among points.
 
-Even though previous work has analysed several aspects of the functional map framework, which include function preservation (e.g., attribute/descriptor preservation, landmark/part correspondences) and regularisation (e.g., commutation with operators, distance/volume preservation, conformality) constraints, the selection of the basis functions and their effects on the functional map remain mostly un-explored. 
+Even though previous work has analysed several aspects of the functional map framework, which
+include function preservation (e.g., attribute/descriptor preservation, landmark/part
+correspondences) and regularisation (e.g., commutation with operators, distance/volume preservation,
+conformality) constraints \citep{OVSJANIKOV2017-STAR}, the selection of the basis functions and their effects on the functional map remain mostly un-explored. 
 
 In this context, our aim is to investigate the definition of \emph{feature-aware basis functions} for shape analysis with the functional maps framework, which was proposed in~\citep{OVSJANIKOV2012} and then significantly extended in the follow-up works (see~\citep{OVSJANIKOV2017-STAR} for an overview). One of the main advantages of this framework is that the optimisation step, which computes the optimal functional map that aligns the descriptor functions and commutes with the Laplace-Beltrami operators on the source and target shapes, can be solved efficiently using standard numerical tools. In fact, it typically reduces to solving a linear system of equations.
 
 \paragraph*{Limitations}
-While very simple and intuitive, this procedure relies strongly on, and as a result can be severely limited by, the choice of the reduced functional bases on the source and target shapes, since all subsequent computations are done in these bases. The most common choice of the reduced basis consists in taking the first~$k$ eigenfunctions of the Laplace-Beltrami operator (i.e., related to the~$k$ smaller eigenvalues), for some~$k<<n$, where~$n$ is the number of vertices of the mesh. The Laplace-Beltrami eigenfunctions have certain desirable properties, which most notably include their multi-scale nature and their invariance to isometric deformations. The former is based on the relation between the Dirichlet energy of functions and the Laplace-Beltrami operator, which implies that the first~$k$ eigenfunctions are well-adapted for representing sufficiently smooth functions on the surface. Increasing~$k$ therefore allows us to construct a basis, capable of representing higher-frequency functions, at the expense of a higher computational complexity and sensitivity to noise. Indeed, it has been shown that the Laplace-Beltrami eigenfunctions form an \emph{optimal} basis for representing sufficiently smooth functions. Moreover, the space spanned by the first~$k$ eigenfunctions can be shown to be stable to non-isometric perturbations, under certain conditions, related to the spectral gap between the~$k$'th and~$(k+1)$'st eigenvalues.
+While very simple and intuitive, this the basic functional map pipeline relies strongly on, and as a result can be severely limited by, the choice of the reduced functional bases on the source and target shapes, since all subsequent computations are done in these bases. The most common choice of the reduced basis consists in taking the first~$k$ eigenfunctions of the Laplace-Beltrami operator (i.e., related to the~$k$ smaller eigenvalues), for some~$k<<n$, where~$n$ is the number of vertices of the mesh. The Laplace-Beltrami eigenfunctions have certain desirable properties, which most notably include their multi-scale nature and their invariance to isometric deformations. The former is based on the relation between the Dirichlet energy of functions and the Laplace-Beltrami operator, which implies that the first~$k$ eigenfunctions are well-adapted for representing sufficiently smooth functions on the surface. Increasing~$k$ therefore allows us to construct a basis, capable of representing higher-frequency functions, at the expense of a higher computational complexity and sensitivity to noise. Indeed, it has been shown that the Laplace-Beltrami eigenfunctions form an \emph{optimal} basis for representing sufficiently smooth functions. Moreover, the space spanned by the first~$k$ eigenfunctions can be shown to be stable to non-isometric perturbations, under certain conditions, related to the spectral gap between the~$k$'th and~$(k+1)$'st eigenvalues.
 
 Despite these advantages, the Laplace-Beltrami eigenfunctions also have the following key limitations.
 %
@@ -168,22 +171,39 @@ Seed points
 \section{Related work\label{sec:RELATED-WORK}}
 We briefly review previous work on the harmonic and heat equations, and on the functional map framework. Then, we introduce the discrete Laplacian that will be used to compute the harmonic and diffusion basis in Sect.~\ref{sec:DISCRETE-SPECTRAL-BASIS}.
 
+\vspace{-0.5mm}
 \paragraph*{Harmonic equation}
-Given a surface~$\mathcal{M}$, the harmonic function~$h$ is the solution of the Laplace equation \mbox{$\Delta h=0$} with Dirichlet boundary conditions \mbox{$h|_{\mathcal{S}}=h_{0}$}, \mbox{$\mathcal{S}\subset\mathcal{M}$}. Harmonic functions have been applied to the definition of shape descriptors with pairs of surface points~\citep{ZHENG2013} and coupled biharmonic bases~\citep{KONVATSKY2013}, to shape approximation~\citep{FENG2012} and deformation~\citep{JOSHI2007,JACOBSON2014,WEBER2012}.
+Given a surface~$\mathcal{M}$, a harmonic function~$h$ is the solution of the Laplace equation
+\mbox{$\Delta h=0$} with Dirichlet boundary conditions \mbox{$h|_{\mathcal{S}}=h_{0}$},
+\mbox{$\mathcal{S}\subset\mathcal{M}$}. Harmonic functions have been used to define descriptors with
+pairs of surface points~\citep{ZHENG2013}, coupled biharmonic bases~\citep{KONVATSKY2013}, shape
+approximation~\citep{FENG2012} and deformation~\citep{JOSHI2007,JACOBSON2014,WEBER2012} among others.
 
+\vspace{-0.5mm}
 \paragraph*{Heat equation}
 Another important equation associated with the Laplace-Beltrami operator is the heat equation \mbox{$(\partial_{t}+\Delta) H(\mathbf{p},t)=0$}, \mbox{$H(\cdot,0)=h$}, where the function \mbox{$H(\mathbf{p},t)$} represents the heat distribution at the point~$\mathbf{p}$ and at time~$t$, and~$h$ is the initial distribution. The solution \mbox{$H(\mathbf{p},t)=\langle K_{t}(\mathbf{p},\cdot),h\rangle_{2}$} is written in terms of the heat kernel \mbox{$K_{t}(\mathbf{p},\mathbf{q})$}, which has been successfully applied to define multi-scale and isometry-invariant signatures and to rewrite the shape similarity problem as the comparison of two metric spaces~\citep{BRONSTEIN2009,BRONSTEIN2010-TOG,COIFMAN2006,GEBAL2009,MEMOLI2011,OVSJANKOV2010,RUSTAMOV2007,SUN2009}.
 
+\vspace{-0.5mm}
 \paragraph*{Functional maps}
-According to~\citep{OVSJANIKOV2012,OVSJANIKOV2017-STAR}, the functional map pipeline selects a set of ~$k_\M$,~$k_\N$ basis functions (e.g., Laplacian eigenfunctions) on the source and target shapes~$\M$ and~$\N$, respectively, and expresses~$q$ descriptor functions (e.g., wave kernel signature) on~$\mathcal{M}$ and~$\mathcal{N}$, in the corresponding bases. These expansion coefficients are stored as~$k_\M \times q$ and~$k_\N \times q$ matrices, respectively. Then, the optimal \emph{functional map} matrix~$\mathbf{C}$ of size \mbox{$k_\N \times k_\M$} is computed by aligning the descriptor functions (i.e., the expansion coefficient) and imposing their commutativity with the Laplace-Beltrami operators on the two shapes. Finally, the functional map~$\mathbf{C}$ is converted to a point-to-point map between the shapes; e.g., by mapping the Dirac~$\delta$ functions centred at each point on the source shape via the computed functional map onto the target shape, and by evaluating the nearest neighbours among the~$\delta$ functions on the target. Following the initial approach,  the  majority of works in this area use the standard Laplacian eigenbasis for functional map computation. Several extensions have been proposed including Compressed Manifold Modes
-%\citep{NEUMANN2014}  
-, bases derived from joint diagonalization 
-%\citep{KONVATSKY2013} 
-and, more recently, Localized Manifold Harmonics %\citep{melzi2017localized}. 
-. None of these, however, are directly feature aware, which has also limited the utility of the functional maps framework in non-isometric shape matching.
+Introduced in~\citep{OVSJANIKOV2012}, the functional map pipeline selects a set of ~$k_\M$,~$k_\N$
+basis functions (e.g., Laplacian eigenfunctions) on the source and target shapes~$\M$ and~$\N$,
+respectively, and expresses~$q$ descriptor functions on~$\mathcal{M}$ and~$\mathcal{N}$, in the
+corresponding bases. These expansion coefficients are stored as~$k_\M \times q$ and~$k_\N \times q$
+matrices, respectively. Then, the optimal \emph{functional map} matrix~$\mathbf{C}$ of size
+\mbox{$k_\N \times k_\M$} is computed by aligning the descriptor functions (i.e., the expansion
+coefficient) and imposing their commutativity with the Laplace-Beltrami operators on the two
+shapes. Finally, the functional map is converted to a point-to-point map, e.g., by mapping the
+Dirac~$\delta$ functions centred at each point on the source shape via the computed functional map
+onto the target shape, and by evaluating the nearest neighbours among the~$\delta$ functions on the
+target. Although most works in this area use the Laplacian eigenbasis, several extensions have been
+proposed including Compressed Manifold Modes \citep{NEUMANN2014}, bases derived from joint
+diagonalization \citep{KONVATSKY2013} and Localized Manifold Harmonics
+\citep{melzi2017localized}. None of these, however, are directly feature aware, which has also
+limited the utility of the functional maps pipeline, e.g, in non-isometric matching.
 
 \paragraph*{Discrete Laplacian}
 The Laplace-Beltrami operator on a surface (e.g., a mesh, a points set) with~$n$ points \mbox{$\mathcal{P}:=\{\mathbf{p}_{i}\}_{i=1}^{n}$} is discretised as~ the \mbox{$n\times n$} matrix~$\mbox{$\tilde{\mathbf{L}}:=\mathbf{B}^{-1}\mathbf{L}$}$, where the \emph{mass matrix}~$\mathbf{B}$ encodes the variation of the area of the Voronoi-regions~\citep{DESBRUN1999} or triangles~\citep{reuter:cad06}, and the \emph{stiffness matrix}~$\mathbf{L}$ encodes the cotangent of the triangle angles~\citep{PINKALL1993}. An analogous discretisation applies to point sets~\citep{BELKIN2003,LIU2012} and polygonal meshes~\citep{ALEXA2011,HERHOLZ2015}. Finally, we recall that the \emph{Laplacian eigensystem} \mbox{$(\lambda_{i},\mathbf{x}_{i})_{i=1}^{n}$}, with \mbox{$\lambda_{i}\leq\lambda_{i+1}$}, satisfies the identity \mbox{$\mathbf{L}\mathbf{x}_{i}=\lambda_{i}\mathbf{B}\mathbf{x}_{i}$} and the eigenvectors are orthonormal with respect to the~$\mathbf{B}$-inner product; i.e., \mbox{$\langle\mathbf{x}_{i},\mathbf{x}_{j}\rangle_{\mathbf{B}}=\mathbf{x}_{i}^{\top}\mathbf{B}\mathbf{x}_{j}=\delta_{ij}$}.
+\newpage
 
 \section{Basis functions\label{sec:SPECTRAL-BASIS}}
 The idea behind the proposed approach is to define a novel class of \emph{basis functions} as solutions to PDEs involving the Laplace-Beltrami operator. More precisely, we introduce the harmonic (Sect.~\ref{sec:HARMONIC-BASIS}) and diffusion (Sect.~\ref{sec:DIFFUSION-BASIS}) basis functions, which have a~$\mathcal{C}^{2}$ smoothness, are shape-aware, isometry-invariant, and centred at a set of seed points. These points (Sect.~\ref{sec:SEED-SELECTION}) are used to define the boundary and initial conditions of the harmonic and diffusion equations and to encode the local geometric information around the seed points in the corresponding functions.
